@@ -1,10 +1,10 @@
 import pygame
 
 # resolution
-WIDTH = 1280
-HEIGHT = 720
+WIDTH = 1920
+HEIGHT = 1040
 # rgb of background
-BACKGROUND = (0, 0, 0)
+BACKGROUND = (1, 1, 6)
 
 
 # sprite renderer
@@ -45,7 +45,7 @@ class Player(Sprite):
 # platform builder
 class Platform(Sprite):
     def __init__(self, startx, starty):
-        super().__init__("assets/platforms/block.png", startx, starty)
+        super().__init__("assets/world/block.png", startx, starty)
 
 
 def main():
@@ -54,12 +54,12 @@ def main():
     clock = pygame.time.Clock()
 
     # where player spawns
-    player = Player(100, 600)
+    player = Player(100, 528)
     platforms = pygame.sprite.Group()
 
     # weird platform placing loop from tutorial
-    for platform in range(0, 1280, 121):
-        platforms.add(Platform(platform, 700))
+    for platform in range(0, 1280, 248):
+        platforms.add(Platform(platform, 656))
 
     while True:
         pygame.event.pump()
