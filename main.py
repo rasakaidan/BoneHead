@@ -5,7 +5,7 @@ from platform import platform
 import pygame
 from pygame.examples.moveit import WIDTH
 
-WINDOW_WIDTH, WINDOW_HEIGHT = 1820, 980
+WINDOW_WIDTH, WINDOW_HEIGHT = 1792, 896
 FPS = 60
 PLAYER_SPEED = 8
 
@@ -48,7 +48,7 @@ def get_platform(size):
     surface = pygame.Surface((size,size), pygame.SRCALPHA, 32)
     rect = pygame.Rect(0,0,size,size)
     surface.blit(image,(0,0), rect)
-    return pygame.transform.scale_by(surface,8)
+    return pygame.transform.scale_by(surface,6)
 
 """Constructor for the player character"""
 class Player(pygame.sprite.Sprite):
@@ -154,7 +154,7 @@ class Platform(Object):
 """Creates a tiled background from name in assets/world/"""
 def get_background(name):
     image = pygame.image.load(join("assets", "world", name))
-    image = pygame.transform.scale_by(image, 6)
+    image = pygame.transform.scale_by(image, 4)
     _, _, width, height = image.get_rect()
     tiles = []
 
@@ -222,15 +222,18 @@ def main(screen):
     pygame.init()
     clock = pygame.time.Clock()
 
-    platform_size = 128
+    platform_size = 96
 
     background, bg_image = get_background("backgroundBricks.png")
     # player spawn location
     player = Player(100,750,40,80)
     # floor creating for loop
-    floor = [Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size) for i in range(-WIDTH // platform_size, WIDTH * 3 // platform_size)]
+    floor = []
+    for i in range(-WIDTH // platform_size, WIDTH * 3 // platform_size):
+        floor.append(Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size))
     # platform
-    platforms = [*floor,(Platform(platform_size*3, platform_size*4, platform_size))]
+    platforms = [*floor,(Platform(platform_size*2, platform_size*6, platform_size)), Platform(platform_size*5, platform_size *4, platform_size),
+                 Platform(platform_size*7, platform_size *4, platform_size)]
 
     run = True
     while run:
