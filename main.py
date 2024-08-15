@@ -1,79 +1,235 @@
+from os.path import join, isfile
+from os import listdir
+from platform import platform
+
 import pygame
+from pygame.examples.moveit import WIDTH
 
-# resolution
-WIDTH = 1920
-HEIGHT = 1040
-# rgb of background
-BACKGROUND = (1, 1, 6)
+WINDOW_WIDTH, WINDOW_HEIGHT = 1820, 980
+FPS = 60
+PLAYER_SPEED = 8
 
+pygame.display.set_caption("Bonehead")
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-# sprite renderer
-class Sprite(pygame.sprite.Sprite):
-    def __init__(self, image, startx, starty):
+"""Flips the sprites on x axis"""
+def flip(sprites):
+    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
+
+"""Loads the sprite sheets into separate sprites for animation"""
+def load_sprite_sheets(dir1, dir2, width, height, direction=False):
+    path = join("assets", dir1, dir2)
+    images = [f for f in listdir(path) if isfile(join(path, f))]
+
+    all_sprites = {}
+
+    for image in images:
+        sprite_sheet = pygame.image.load(join(path, image)).convert_alpha()
+        sprites = []
+        for i in range(sprite_sheet.get_width() // width):
+            surface = pygame.Surface((width, height), pygame.SRCALPHA, 32)
+            rect = pygame.Rect(i * width, 0, width, height)
+            surface.blit(sprite_sheet, (0,0), rect)
+
+            sprites.append(pygame.transform.scale_by(surface,5))
+
+        if direction:
+            all_sprites[image.replace(".png", "") + "_right"] = sprites
+            all_sprites[image.replace(".png", "") + "_left"] = flip(sprites)
+        else:
+            all_sprites[image.replace(".png","")] = sprites
+
+    return all_sprites
+
+"""Constructor for the default platform"""
+def get_platform(size):
+    path = join("assets", "world", "platformBricks.png")
+    image = pygame.image.load(path).convert_alpha()
+    surface = pygame.Surface((size,size), pygame.SRCALPHA, 32)
+    rect = pygame.Rect(0,0,size,size)
+    surface.blit(image,(0,0), rect)
+    return pygame.transform.scale_by(surface,8)
+
+"""Constructor for the player character"""
+class Player(pygame.sprite.Sprite):
+    GRAVITY = 3
+    SPRITES = load_sprite_sheets("characters","bonehead",16, 16, True)
+    ANIMATION_DELAY = 12
+
+    def __init__(self, x, y, width, height):
         super().__init__()
-        self.image = pygame.image.load(image)
-        self.rect = self.image.get_rect()
-        self.rect.center = [startx, starty]
+        self.rect = pygame.Rect(x, y, width, height)
+        self.x_vel = 0
+        self.y_vel = 0
+        self.mask = None
+        self.fall_count = 0
+        self.direction = "left"
+        self.animation_count = 0
+        self.jump_count = 0
 
-    def update(self):
-        pass
 
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
+    def draw(self, window):
+        window.blit(self.sprite, (self.rect.x, self.rect.y))
 
-
-# player builder
-class Player(Sprite):
-    def __init__(self, startx, starty):
-        super().__init__("assets/characters/bonehead.png", startx, starty)
-
-        # player movement speed
-        self.speed = 4.5
+    def jump(self):
+        self.y_vel = -self.GRAVITY * 8
+        self.animation_count = 0
+        self.jump_count += 1
+        if self.jump_count == 1:
+            self.fall_count = 0
 
     def move(self, x, y):
-        self.rect.move_ip([x, y])
+        self.rect.x += x
+        self.rect.y += y
+
+    def move_left(self, velocity):
+        self.x_vel = -velocity
+        # for animation
+        if self.direction != "left":
+            self.direction = "left"
+            self.animation_count = 0
+
+    def move_right(self, velocity):
+        self.x_vel = velocity
+        # for animation
+        if self.direction != "right":
+            self.direction = "right"
+            self.animation_count = 0
+
+    def loop(self, fps):
+        self.move(self.x_vel, self.y_vel)
+        # gravity
+        self.y_vel += min(3, (self.fall_count / fps) * self.GRAVITY)
+
+        self.fall_count += 3
+        self.update_sprite()
+
+    def landed(self):
+        self.fall_count = 0
+        self.y_vel = 0
+        self.jump_count = 0
+
+    def hit_head(self):
+        self.count = 0
+        self. y_vel *= -1
+
+    """Animates sprite"""
+    def update_sprite(self):
+        sprite_sheet = "idle"
+        if self.x_vel != 0:
+            sprite_sheet = "walk"
+
+        sprite_sheet_name = sprite_sheet + "_" + self.direction
+        sprites = self.SPRITES[sprite_sheet_name]
+        sprite_index = (self.animation_count // self.ANIMATION_DELAY) % len(sprites)
+        self.sprite = sprites[sprite_index]
+        self.animation_count += 1
+        self.update()
 
     def update(self):
-        # basic controls
-        key = pygame.key.get_pressed()
-        if key[pygame.K_a]:
-            self.move(-self.speed, 0)
-        elif key[pygame.K_d]:
-            self.move(self.speed, 0)
+        self.rect = self.sprite.get_rect(topleft = (self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.sprite)
 
 
-# platform builder
-class Platform(Sprite):
-    def __init__(self, startx, starty):
-        super().__init__("assets/world/block.png", startx, starty)
+class Object(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, name = None):
+        super().__init__()
+        self.rect = pygame.Rect(x, y, width, height)
+        self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+        self.width = width
+        self.height = height
+        self.name = name
+
+    def draw(self, window):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
+class Platform(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        platform = get_platform(size)
+        self.image.blit(platform, (0,0))
+        self.mask = pygame.mask.from_surface(self.image)
 
 
-def main():
+"""Creates a tiled background from name in assets/world/"""
+def get_background(name):
+    image = pygame.image.load(join("assets", "world", name))
+    image = pygame.transform.scale_by(image, 6)
+    _, _, width, height = image.get_rect()
+    tiles = []
+
+    for i in range(WINDOW_WIDTH // width + 1):
+        for j in range(WINDOW_HEIGHT // height + 1):
+            pos = (i * width, j * height)
+            tiles.append(pos)
+    return tiles, image
+
+"""Renderer"""
+def draw(window, background, bg_image, player, objects):
+    for tile in background:
+        window.blit(bg_image, tile)
+
+    for object in objects:
+        object.draw(window)
+
+    player.draw(window)
+    pygame.display.update()
+
+
+def vertical_collision(player, objects, y_velocity):
+    collided_objects = []
+    for object in objects:
+        if pygame.sprite.collide_mask(player,object):
+            if y_velocity > 0:
+                player.rect.bottom = object.rect.top
+                player.landed()
+            elif y_velocity < 0:
+                player.rect.top = object.rect.bottom
+                player.hit_head()
+        collided_objects.append(object)
+
+    return collided_objects
+
+
+def move(player, objects):
+    keys = pygame.key.get_pressed()
+
+    player.x_vel = 0
+    if keys[pygame.K_a]:
+        player.move_left(PLAYER_SPEED)
+    if keys[pygame.K_d]:
+        player.move_right(PLAYER_SPEED)
+
+    vertical_collision(player, objects, player.y_vel)
+
+
+def main(screen):
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
 
-    # where player spawns
-    player = Player(100, 528)
-    platforms = pygame.sprite.Group()
+    platform_size = 128
 
-    # weird platform placing loop from tutorial
-    for platform in range(0, 1280, 248):
-        platforms.add(Platform(platform, 656))
+    background, bg_image = get_background("backgroundBricks.png")
+    # player spawn location
+    player = Player(100,750,40,80)
+    # floor creating for loop
+    floor = [Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size) for i in range(-WIDTH // platform_size, WIDTH * 3 // platform_size)]
 
-    while True:
-        pygame.event.pump()
-        player.update()
+    run = True
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                # jump handler, can do multi jump
+                if event.key == pygame.K_w and player.jump_count < 1:
+                    player.jump()
 
-        screen.fill(BACKGROUND)
-        player.draw(screen)
-        platforms.draw(screen)
-        pygame.display.flip()
-
-        # 60fps gamespeed
-        clock.tick(60)
+        player.loop(FPS)
+        move(player, floor)
+        draw(screen, background , bg_image, player, floor)
 
 
-# idk, runs it
 if __name__ == "__main__":
-    main()
+    main(screen)
