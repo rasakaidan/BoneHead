@@ -54,7 +54,7 @@ def get_platform(size):
 class Player(pygame.sprite.Sprite):
     GRAVITY = 3
     SPRITES = load_sprite_sheets("characters","bonehead",16, 16, True)
-    ANIMATION_DELAY = 12
+    ANIMATION_DELAY = 8
 
     def __init__(self, x, y, width, height):
         super().__init__()
@@ -72,7 +72,7 @@ class Player(pygame.sprite.Sprite):
         window.blit(self.sprite, (self.rect.x, self.rect.y))
 
     def jump(self):
-        self.y_vel = -self.GRAVITY * 8
+        self.y_vel = -self.GRAVITY * 7
         self.animation_count = 0
         self.jump_count += 1
         if self.jump_count == 1:
@@ -191,13 +191,28 @@ def vertical_collision(player, objects, y_velocity):
     return collided_objects
 
 
+def collide(player, objects, x):
+    player.move(x,0)
+    player.update()
+    collided_object = None
+    for object in objects:
+        if pygame.sprite.collide_mask(player, object):
+            collided_object = object
+
+    player.move(-x,0)
+    player.update()
+    return collided_object
+
+
 def move(player, objects):
     keys = pygame.key.get_pressed()
+    collide_left = collide(player, objects, -PLAYER_SPEED * 2)
+    collide_right = collide(player, objects, PLAYER_SPEED * 2)
 
     player.x_vel = 0
-    if keys[pygame.K_a]:
+    if keys[pygame.K_a] and not collide_left:
         player.move_left(PLAYER_SPEED)
-    if keys[pygame.K_d]:
+    if keys[pygame.K_d] and not collide_right:
         player.move_right(PLAYER_SPEED)
 
     vertical_collision(player, objects, player.y_vel)
@@ -214,6 +229,8 @@ def main(screen):
     player = Player(100,750,40,80)
     # floor creating for loop
     floor = [Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size) for i in range(-WIDTH // platform_size, WIDTH * 3 // platform_size)]
+    # platform
+    platforms = [*floor,(Platform(platform_size*3, platform_size*4, platform_size))]
 
     run = True
     while run:
@@ -227,8 +244,8 @@ def main(screen):
                     player.jump()
 
         player.loop(FPS)
-        move(player, floor)
-        draw(screen, background , bg_image, player, floor)
+        move(player, platforms)
+        draw(screen, background , bg_image, player, platforms)
 
 
 if __name__ == "__main__":
