@@ -42,8 +42,8 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     return all_sprites
 
 """Constructor for the default platform"""
-def get_platform(size):
-    path = join("assets", "world", "platformBricks.png")
+def get_platform(size, image):
+    path = join("assets", "world", image)
     image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size,size), pygame.SRCALPHA, 32)
     rect = pygame.Rect(0,0,size,size)
@@ -146,7 +146,14 @@ class Object(pygame.sprite.Sprite):
 class Platform(Object):
     def __init__(self, x, y, size):
         super().__init__(x, y, size, size)
-        platform = get_platform(size)
+        platform = get_platform(size, "platformBricks.png")
+        self.image.blit(platform, (0,0))
+        self.mask = pygame.mask.from_surface(self.image)
+
+class PlayerPlatform(Object):
+    def __init__(self, x, y, size):
+        super().__init__(x, y, size, size)
+        platform = get_platform(size, "headPlatform.png")
         self.image.blit(platform, (0,0))
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -218,6 +225,11 @@ def move(player, objects):
     vertical_collision(player, objects, player.y_vel)
 
 
+def create_platform(player, size, platforms):
+    platforms.append(PlayerPlatform(player.rect.x+24, player.rect.y+80, size))
+    return
+
+
 def main(screen):
     pygame.init()
     clock = pygame.time.Clock()
@@ -228,11 +240,11 @@ def main(screen):
     # player spawn location
     player = Player(100,750,40,80)
     # floor creating for loop
-    floor = []
+    platforms = []
     for i in range(-WIDTH // platform_size, WIDTH * 3 // platform_size):
-        floor.append(Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size))
+        platforms.append(Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size))
     # platform
-    platforms = [*floor,(Platform(platform_size*2, platform_size*6, platform_size)), Platform(platform_size*5, platform_size *4, platform_size),
+    platforms = [*platforms,(Platform(platform_size*2, platform_size*6, platform_size)), Platform(platform_size*5, platform_size *4, platform_size),
                  Platform(platform_size*7, platform_size *4, platform_size)]
 
     run = True
@@ -245,6 +257,8 @@ def main(screen):
                 # jump handler, can do multi jump
                 if event.key == pygame.K_w and player.jump_count < 1:
                     player.jump()
+                if event.key == pygame.K_SPACE:
+                    create_platform(player, platform_size, platforms)
 
         player.loop(FPS)
         move(player, platforms)
