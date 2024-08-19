@@ -57,6 +57,8 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, x, y, width, height):
         super().__init__()
+        self.initial_x = x
+        self.initial_y = y
         self.rect = pygame.Rect(x, y, width, height)
         self.x_vel = 0
         self.y_vel = 0
@@ -235,7 +237,12 @@ def is_overlapping(platforms, new_platform):
 def create_platform(player, size):
     return PlayerPlatform(player.rect.x+24, player.rect.y+80, size)
 
-
+def respawn(player):
+    # do an animation here
+    player.x_vel = 0
+    player.y_vel = 0
+    player.rect.x = player.initial_x
+    player.rect.y = player.initial_y
 
 def build_level1(platforms, platform_size):
     platforms.clear()
@@ -276,6 +283,7 @@ def main(screen):
                     newPlatform = create_platform(player, platform_size)
                     if not is_overlapping(platforms, newPlatform):
                         platforms.append(newPlatform)
+                        respawn(player)
 
                 # reset the world
                 if event.key == pygame.K_r:
