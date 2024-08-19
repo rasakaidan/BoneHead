@@ -297,7 +297,7 @@ def main(screen):
 
     background, bg_image = get_background("backgroundBricks.png")
     # player spawn location
-    player = Player(100,750,40,80)
+    player = Player(platform_size*1,WINDOW_HEIGHT- platform_size,40,80)
 
 
     run = True
@@ -316,6 +316,7 @@ def main(screen):
                     if not is_overlapping(platforms, newPlatform):
                         platforms.append(newPlatform)
                         player.skull_count += 1
+                        respawn(player)
                 # reset the world
                 if event.key == pygame.K_r:
                     build_level1(platforms, platform_size)
