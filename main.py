@@ -58,6 +58,8 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, x, y, width, height):
         super().__init__()
+        self.initial_x = x
+        self.initial_y = y
         self.rect = pygame.Rect(x, y, width, height)
         self.x_vel = 0
         self.y_vel = 0
@@ -111,7 +113,7 @@ class Player(pygame.sprite.Sprite):
 
     def hit_head(self):
         self.count = 0
-        self. y_vel *= -1
+        self.y_vel *= -1
 
     """Animates sprite"""
     def update_sprite(self):
@@ -229,6 +231,15 @@ def create_platform(player, size, platforms):
     platforms.append(PlayerPlatform(player.rect.x+24, player.rect.y+80, size))
     return
 
+def respawn(player):
+    # do an animation here
+    player.x_vel = 0
+    player.y_vel = 0
+    player.rect.x = player.initial_x
+    player.rect.y = player.initial_y
+
+
+
 
 def main(screen):
     pygame.init()
@@ -259,6 +270,9 @@ def main(screen):
                     player.jump()
                 if event.key == pygame.K_SPACE:
                     create_platform(player, platform_size, platforms)
+                    respawn(player)
+
+
 
         player.loop(FPS)
         move(player, platforms)
