@@ -217,8 +217,8 @@ def collide(player, objects, x):
 
 def move(player, objects):
     keys = pygame.key.get_pressed()
-    collide_left = collide(player, objects, -PLAYER_SPEED * 2)
-    collide_right = collide(player, objects, PLAYER_SPEED * 2)
+    collide_left = collide(player, objects, -PLAYER_SPEED * 1.2)
+    collide_right = collide(player, objects, PLAYER_SPEED * 1.2)
 
     player.x_vel = 0
     if keys[pygame.K_a] and not collide_left:
@@ -244,10 +244,10 @@ def respawn(player):
     player.y_vel = 0
     player.rect.x = player.initial_x
     player.rect.y = player.initial_y
-    player.skull_count = 0
 
 def build_level1(platforms, platform_size):
     platforms.clear()
+
     for i in range(0, WINDOW_WIDTH //platform_size):
         platforms.append(Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size))
     for i in range(0, WINDOW_HEIGHT // platform_size):
@@ -255,7 +255,7 @@ def build_level1(platforms, platform_size):
         platforms.append(Platform(0, i * platform_size, platform_size))
     for i in range (3, (WINDOW_WIDTH// platform_size) - 1):
         platforms.append(Platform(i * platform_size, 0, platform_size))
-    # draws from the top left corner, (0,0) = top left, (17,8) = bottom right
+    # draws from the top left corner, (0,0) = top left, (18,9) = bottom right
     # its so uglyyy
     #first part
     for i in range(4,9):
@@ -297,7 +297,7 @@ def main(screen):
 
     background, bg_image = get_background("backgroundBricks.png")
     # player spawn location
-    player = Player(100,750,40,80)
+    player = Player(platform_size*1,WINDOW_HEIGHT- platform_size,40,80)
 
 
     run = True
@@ -316,9 +316,11 @@ def main(screen):
                     if not is_overlapping(platforms, newPlatform):
                         platforms.append(newPlatform)
                         player.skull_count += 1
+                        respawn(player)
                 # reset the world
                 if event.key == pygame.K_r:
                     build_level1(platforms, platform_size)
+                    player.skull_count = 0
                     respawn(player)
 
         player.loop(FPS)
