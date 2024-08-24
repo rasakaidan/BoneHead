@@ -3,6 +3,11 @@ from os import listdir
 
 import pygame
 
+
+"""Flips the sprites on x axis"""
+def flip(sprites):
+    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
+
 """Loads the sprite sheets into separate sprites for animation"""
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     path = join("assets", dir1, dir2)
@@ -18,7 +23,7 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
             rect = pygame.Rect(i * width, 0, width, height)
             surface.blit(sprite_sheet, (0,0), rect)
 
-            sprites.append(pygame.transform.scale_by(surface,5))
+            sprites.append(pygame.transform.scale_by(surface,4))
 
         if direction:
             all_sprites[image.replace(".png", "") + "_right"] = sprites
@@ -32,11 +37,11 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
 """Constructor for the player character"""
 class Player(pygame.sprite.Sprite):
     GRAVITY = 4
-    SPRITES = load_sprite_sheets("characters","bonehead",16, 16, True)
     ANIMATION_DELAY = 8
 
     def __init__(self, x, y, width, height):
         super().__init__()
+        self.SPRITES = load_sprite_sheets("characters","bonehead",16, 16, True)
         self.initial_x = x
         self.initial_y = y
         self.rect = pygame.Rect(x, y, width, height)
@@ -47,14 +52,14 @@ class Player(pygame.sprite.Sprite):
         self.direction = "left"
         self.animation_count = 0
         self.jump_count = 0
-        self.skull_count = 0
+        self.skull_count = 100
 
 
     def draw(self, window):
         window.blit(self.sprite, (self.rect.x, self.rect.y))
 
     def jump(self):
-         if self.fall_count <= 30:
+         if self.fall_count <= 10:
              self.y_vel = -self.GRAVITY * 2.1
              self.animation_count = 0
              self.jump_count += 1

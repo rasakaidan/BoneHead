@@ -5,16 +5,15 @@ import pygame
 from platformClass import Platform, PlayerPlatform, Object
 from playerClass import Player
 
-WINDOW_WIDTH, WINDOW_HEIGHT = 1728, 960
+LEVEL_SIZE_X, LEVEL_SIZE_Y = 22,12
+PLATFORM_SIZE = 80
+HEAD_SIZE = 40
+WINDOW_WIDTH, WINDOW_HEIGHT = LEVEL_SIZE_X*PLATFORM_SIZE, LEVEL_SIZE_Y*PLATFORM_SIZE
 FPS = 60
 PLAYER_SPEED = 8
 
 pygame.display.set_caption("Bonehead")
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-
-"""Flips the sprites on x axis"""
-def flip(sprites):
-    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
 
 
 """Creates a tiled background from name in assets/world/"""
@@ -91,7 +90,7 @@ def is_overlapping(platforms, new_platform):
     return False
 
 def create_platform(player, size):
-    return PlayerPlatform(player.rect.x+24, player.rect.y+80, size)
+    return PlayerPlatform(player.rect.x+16, player.rect.y+64, size)
 
 def respawn(player):
     # do an animation here
@@ -100,81 +99,45 @@ def respawn(player):
     player.rect.x = player.initial_x
     player.rect.y = player.initial_y
 
-def build_level1(platforms, platform_size):
-    platforms.clear()
 
-    for i in range(0, WINDOW_WIDTH //platform_size):
-        platforms.append(Platform(i * platform_size, WINDOW_HEIGHT - platform_size, platform_size))
-    for i in range(0, WINDOW_HEIGHT // platform_size):
-        platforms.append(Platform(WINDOW_WIDTH - platform_size, i * platform_size, platform_size))
-        platforms.append(Platform(0, i * platform_size, platform_size))
-    for i in range (3, (WINDOW_WIDTH// platform_size) - 1):
-        platforms.append(Platform(i * platform_size, 0, platform_size))
-    # draws from the top left corner, (0,0) = top left, (18,9) = bottom right
-    # its so uglyyy
-    #first part
-    for i in range(4,9):
-        platforms.append(Platform(platform_size * 4, platform_size * i, platform_size))
-    for i in range(1,7):
-        platforms.append(Platform(platform_size * i, platform_size * 2, platform_size))
-    platforms.append(Platform(platform_size * 3, platform_size * 5, platform_size))
-    platforms.append(Platform(platform_size * 3, platform_size * 7, platform_size))
-    platforms.append(Platform(platform_size * 5, platform_size * 5, platform_size))
-    platforms.append(Platform(platform_size * 8, platform_size * 8, platform_size))
-    platforms.append(Platform(platform_size * 9, platform_size * 8, platform_size))
-    #second part
-    platforms.append(Platform(platform_size * 6, platform_size * 3, platform_size))
-    platforms.append(Platform(platform_size * 7, platform_size * 4, platform_size))
-    platforms.append(Platform(platform_size * 8, platform_size * 4, platform_size))
-    for i in range (9,12):
-        platforms.append(Platform(platform_size * i, platform_size * 3, platform_size))
-    for i in range(5,9):
-        platforms.append(Platform(platform_size * 10, platform_size * i, platform_size))
-    #third part
-    for i in range(2,6):
-        platforms.append(Platform(platform_size * 12, platform_size * i, platform_size))
-    platforms.append(Platform(platform_size * 15, platform_size * 6, platform_size))
-    platforms.append(Platform(platform_size * 16, platform_size * 8, platform_size))
-    platforms.append(Platform(platform_size * 16, platform_size * 3, platform_size))
-    for i in range(14,17):
-        platforms.append(Platform(platform_size * i, platform_size * 4, platform_size))
+def level_select(level):
 
-    return
-
-def level_select(number):
-
-    base =  [[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+    base =  [[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
+             [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]
 
 
-    if number == 1:
+    if level == 1:
         return base
 
-def build_level(array, platform_size):
+def build_level(level, platform_size):
     # iterate through array, if indexval = 1, draw platform there
-    return
-
+    platforms = []
+    matrix = level_select(level)
+    for y,row in enumerate(matrix):
+        for x,value in enumerate(row):
+            if value == 1:
+                platforms.append(Platform(platform_size * x, platform_size * y, platform_size))
+    return platforms
 
 def main(screen):
     pygame.init()
     clock = pygame.time.Clock()
-
-    platform_size = 96
-    head_size = 48
-    platforms = []
-    build_level1(platforms, platform_size)
+    current_level = 1
+    platforms = build_level(current_level, PLATFORM_SIZE)
 
     background, bg_image = get_background("backgroundBricks.png")
     # player spawn location
-    player = Player(platform_size*1,WINDOW_HEIGHT- platform_size,40,80)
+    player = Player(PLATFORM_SIZE*1,WINDOW_HEIGHT - PLATFORM_SIZE,32,64)
 
 
     run = True
@@ -189,15 +152,15 @@ def main(screen):
                     player.jump()
                 # place a skull
                 if event.key == pygame.K_SPACE:
-                    newPlatform = create_platform(player, head_size)
-                    if not is_overlapping(platforms, newPlatform):
+                    newPlatform = create_platform(player, HEAD_SIZE)
+                    if not is_overlapping(platforms, newPlatform) and player.skull_count > 0:
                         platforms.append(newPlatform)
-                        player.skull_count += 1
+                        player.skull_count -= 1
                         #respawn(player)
                 # reset the world
                 if event.key == pygame.K_r:
-                    build_level1(platforms, platform_size)
-                    player.skull_count = 0
+                    platforms = build_level(current_level, PLATFORM_SIZE)
+                    player.skull_count = 100
                     respawn(player)
 
         player.loop(FPS)

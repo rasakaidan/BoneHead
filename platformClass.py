@@ -39,4 +39,4 @@ def get_platform(size, image):
     surface = pygame.Surface((size,size), pygame.SRCALPHA, 32)
     rect = pygame.Rect(0,0,size,size)
     surface.blit(image,(0,0), rect)
-    return pygame.transform.scale_by(surface,6)
+    return pygame.transform.scale_by(surface,5)
