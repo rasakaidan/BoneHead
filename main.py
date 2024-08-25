@@ -14,6 +14,7 @@ FPS = 60
 PLAYER_SPEED = 8
 
 pygame.display.set_caption("Bonehead")
+
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 
@@ -38,8 +39,18 @@ def draw(window, background, bg_image, player, objects):
     for object in objects:
         object.draw(window)
 
+
+    # labels tracking player height and number of skulls used
+    myfont = pygame.font.SysFont("monospace", 15)
+    p_height = WINDOW_HEIGHT - player.rect.y
+    height_score = myfont.render("Height: " + str(p_height), 1, (255, 255, 0))
+    skull_score = myfont.render("Skulls: " + str(player.skull_count), 1, (255, 255, 0))
+    screen.blit(height_score, (50, 50))
+    screen.blit(skull_score, (50, 70))
+
     player.draw(window)
     pygame.display.update()
+
 
 
 def vertical_collision(player, objects, y_velocity):
@@ -169,6 +180,11 @@ def main(screen):
                 if event.key == pygame.K_r:
                     platforms = build_level(current_level, PLATFORM_SIZE)
                     player.skull_count = 100
+                    respawn(player)
+
+                #when exit window height, next level
+                if (WINDOW_HEIGHT - player.rect.y) > 1000:
+                    platforms = build_level(current_level, PLATFORM_SIZE)
                     respawn(player)
 
         player.loop(FPS)
