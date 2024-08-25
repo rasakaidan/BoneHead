@@ -2,6 +2,7 @@ from os.path import join, isfile
 from os import listdir
 
 import pygame
+import random
 from platformClass import Platform, PlayerPlatform, Object
 from playerClass import Player
 
@@ -104,19 +105,27 @@ def level_select(level):
 
     base =  [[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
              [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
              [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
-             [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
+             [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]
 
-
-    if level == 1:
+    randomMatrix = []
+    for y in range(12):
+        row = []
+        for x in range(22):
+            bit = random.randrange(0, 2)
+            row.append(bit)
+        randomMatrix.append(row)
+    if level == 0:
+        return randomMatrix
+    elif level == 1:
         return base
 
 def build_level(level, platform_size):
@@ -132,13 +141,13 @@ def build_level(level, platform_size):
 def main(screen):
     pygame.init()
     clock = pygame.time.Clock()
-    current_level = 1
+    random.seed()
+
+    current_level = 0
     platforms = build_level(current_level, PLATFORM_SIZE)
 
     background, bg_image = get_background("backgroundBricks.png")
-    # player spawn location
     player = Player(PLATFORM_SIZE*1,WINDOW_HEIGHT - PLATFORM_SIZE,32,64)
-
 
     run = True
     while run:
@@ -156,7 +165,6 @@ def main(screen):
                     if not is_overlapping(platforms, newPlatform) and player.skull_count > 0:
                         platforms.append(newPlatform)
                         player.skull_count -= 1
-                        #respawn(player)
                 # reset the world
                 if event.key == pygame.K_r:
                     platforms = build_level(current_level, PLATFORM_SIZE)
