@@ -13,8 +13,12 @@ def randomMatrix():
             row.append(bit)
         testMap.append(row)
 
-    testMap[0][1] = "s"
+    testMap[0][random.randrange(0, 12)] = "s"
     testMap[10][1] = "d"
+
+    testMap[11][0] = 1
+    testMap[11][1] = 1
+    testMap[11][2] = 1
 
     return testMap
 
