@@ -6,3 +6,5 @@ To Do:
 2. map stack for when spawning without floor beneath you - fall back down to previous? Refer to A
 
 A. Can close sides and bottom/top of map to stop from going outside of borders when not intended.
+B. Change source point on top row to create differrent feeling maps
+
