@@ -1,11 +1,8 @@
-# Python3 implementation for the above approach
 import random
 
-
-INT_MAX = 2147483647
-
-
 # generates new random matrix
+# set S as source on top of matrix to clear space and ensure solvability
+
 def randomMatrix():
     testMap = []
 
@@ -20,10 +17,6 @@ def randomMatrix():
     testMap[10][1] = "d"
 
     return testMap
-
-
-
-# Python3 Code implementation for above problem
 
 # QItem for current location and distance
 # from source location

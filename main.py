@@ -129,7 +129,6 @@ def level_select(level):
              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]
 
 
-
     if level == 0:
         return generateMap()
 
@@ -195,9 +194,3 @@ def main(screen):
 
 if __name__ == "__main__":
     main(screen)
-
-
-    #TO DO LIST
-    # FIX SCORE
-    # GAME OVER SCREEN AFTER OUT OF SKULL
-    # LEVEL COUNTER
