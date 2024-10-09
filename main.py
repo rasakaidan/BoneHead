@@ -5,6 +5,7 @@ import pygame
 import random
 from platformClass import Platform, PlayerPlatform, Object
 from playerClass import Player
+from arraySolver import generateMap, randomMatrix
 
 LEVEL_SIZE_X, LEVEL_SIZE_Y = 22,12
 PLATFORM_SIZE = 80
@@ -43,7 +44,7 @@ def draw(window, background, bg_image, player, objects):
     # labels tracking player height and number of skulls used
     myfont = pygame.font.SysFont("monospace", 15)
     p_height = WINDOW_HEIGHT - player.rect.y
-    height_score = myfont.render("Height: " + str(p_height), 1, (255, 255, 0))
+    height_score = myfont.render("Height: " + str(p_height + (WINDOW_HEIGHT * player.level)), 1, (255, 255, 0))
     skull_score = myfont.render("Skulls: " + str(player.skull_count), 1, (255, 255, 0))
     screen.blit(height_score, (50, 50))
     screen.blit(skull_score, (50, 70))
@@ -127,15 +128,11 @@ def level_select(level):
              [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,],
              [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]
 
-    randomMatrix = []
-    for y in range(12):
-        row = []
-        for x in range(22):
-            bit = random.randrange(0, 2)
-            row.append(bit)
-        randomMatrix.append(row)
+
+
     if level == 0:
-        return randomMatrix
+        return generateMap()
+
     elif level == 1:
         return base
 
@@ -143,8 +140,8 @@ def build_level(level, platform_size):
     # iterate through array, if indexval = 1, draw platform there
     platforms = []
     matrix = level_select(level)
-    for y,row in enumerate(matrix):
-        for x,value in enumerate(row):
+    for y ,row in enumerate(matrix):
+        for x ,value in enumerate(row):
             if value == 1:
                 platforms.append(Platform(platform_size * x, platform_size * y, platform_size))
     return platforms
@@ -176,15 +173,19 @@ def main(screen):
                     if not is_overlapping(platforms, newPlatform) and player.skull_count > 0:
                         platforms.append(newPlatform)
                         player.skull_count -= 1
+                    elif player.skull_count <= 0:
+                        print(player.level)
                 # reset the world
                 if event.key == pygame.K_r:
                     platforms = build_level(current_level, PLATFORM_SIZE)
                     player.skull_count = 100
+                    player.level = 0
                     respawn(player)
 
                 #when exit window height, next level
                 if (WINDOW_HEIGHT - player.rect.y) > 1000:
                     platforms = build_level(current_level, PLATFORM_SIZE)
+                    player.level += 1
                     respawn(player)
 
         player.loop(FPS)
@@ -194,3 +195,9 @@ def main(screen):
 
 if __name__ == "__main__":
     main(screen)
+
+
+    #TO DO LIST
+    # FIX SCORE
+    # GAME OVER SCREEN AFTER OUT OF SKULL
+    # LEVEL COUNTER

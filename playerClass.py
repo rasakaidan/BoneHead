@@ -53,6 +53,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_count = 0
         self.jump_count = 0
         self.skull_count = 100
+        self.level = 0
 
 
     def draw(self, window):
